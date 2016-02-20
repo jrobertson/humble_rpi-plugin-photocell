@@ -13,7 +13,7 @@ class HumbleRPiPluginPhotocell
   def initialize(settings: {}, variables: {})
 
     @channel = settings[:channel] || 0
-    @threshold = settings[:threshold] || 100
+    @threshold = settings[:threshold] || 10
     @notifier = variables[:notifier]
     @device_id = variables[:device_id] || 'pi'
     @photocell = RPiPhotocell.new pin: @channel
@@ -23,7 +23,9 @@ class HumbleRPiPluginPhotocell
   def start()
     
     puts 'ready to monitor photocell'
-    old_val = @photocell.read
+    
+    @notifier.notice "%s/photocell: %s" % [@device_id, val=@photocell.read]
+    old_val = val
     
     loop do
       
@@ -31,9 +33,9 @@ class HumbleRPiPluginPhotocell
 
       if (old_val - val).abs >= @threshold then
         @notifier.notice "%s/photocell: %s" % [@device_id, val]
-      end
-      
-      old_val = val
+        old_val = val        
+      end      
+
       sleep 1
       
     end
